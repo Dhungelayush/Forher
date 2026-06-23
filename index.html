@@ -154,50 +154,83 @@
             font-weight: bold;
         }
 
-        /* --- Background Slideshow --- */
+        /* --- Full Screen Grid Album --- */
         #slideshow-container {
             position: absolute;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
+            width: 100vw;
+            height: 100vh;
             z-index: 1;
             opacity: 0;
-            transition: opacity 1.5s ease-in, background-image 1s ease-in-out;
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            background-color: #f7e1e7;
+            transition: opacity 1.5s ease-in-out;
+            box-sizing: border-box;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, 1fr);
+            gap: 4px;
+            background-color: #000; 
         }
 
-        /* --- Subtitles Section --- */
+        .album-slot {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #222;
+        }
+
+        .album-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: cover; 
+            opacity: 0;
+            transition: opacity 1.8s ease-in-out;
+        }
+
+        /* --- Paragraph Subtitles Box --- */
         #voicemail-section {
             position: absolute;
-            top: 30px;
+            bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            width: 90%;
-            max-width: 500px;
+            width: 92%;
+            max-width: 550px;
+            height: 28vh;
             z-index: 50;
-            display: flex;
-            justify-content: center;
-            align-items: center;
             opacity: 0;
+            pointer-events: none;
             transition: opacity 1s ease-in;
+            display: block;
         }
 
         #subtitle-text {
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 12px 20px;
+            background-color: rgba(255, 255, 255, 0); /* CHANGED: Fully transparent background */
+            padding: 18px;
             border-radius: 20px;
-            font-size: 1.2rem;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            font-size: 1.2rem; /* Increased size slightly for easier reading over photos */
+            line-height: 1.6;
             width: 100%;
+            height: 100%;
+            box-sizing: border-box;
+            overflow-y: auto;
+            text-align: left;
+            font-weight: bold; /* Bold text ensures text clarity over images */
+            color: #ffffff; /* White color pops intensely over image grid backgrounds */
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.9), -1px -1px 0 rgba(0,0,0,0.5), 1px -1px 0 rgba(0,0,0,0.5), -1px 1px 0 rgba(0,0,0,0.5), 1px 1px 0 rgba(0,0,0,0.5); /* Strong clean outline shadow keeps letters fully readable */
         }
 
-        @keyframes subtitleFade {
-            from { opacity: 0; transform: translateY(-5px); }
-            to { opacity: 1; transform: translateY(0); }
+        /* Continuous Typing Cursor Indicator */
+        #subtitle-text::after {
+            content: '✏️';
+            animation: blink 1s infinite;
+            margin-left: 4px;
+            display: inline-block;
+            vertical-align: middle;
+            filter: drop-shadow(2px 2px 2px rgba(0,0,0,0.8));
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
         }
 
         /* --- Interactive Choice Overlay --- */
@@ -212,7 +245,7 @@
             justify-content: center;
             align-items: center;
             z-index: 100;
-            background-color: rgba(247, 225, 231, 0.85); 
+            background-color: rgba(247, 225, 231, 0.94); 
             opacity: 0;
             visibility: hidden;
             transition: opacity 1s ease-in-out, visibility 1s;
@@ -301,7 +334,7 @@
 
     <div id="welcome-screen">
         <div class="welcome-card">
-            <div class="pink-font" style="font-size: 1.6rem; margin-bottom: 10px;">Hey Beautiful... ❤️</div>
+            <div class="pink-font" style="font-size: 1.6rem; margin-bottom: 10px;">MY BABY ❤️</div>
             <div class="pink-font" style="font-size: 1.1rem; font-weight: normal; color: #888;">I made a little puzzle out of our memories. Turn your volume up and click below to open it.</div>
             <button class="start-btn" id="start-game-btn">Play thiss</button>
         </div>
@@ -312,14 +345,21 @@
         <div class="memory-game" id="game-grid"></div>
     </div>
 
-    <div id="slideshow-container"></div>
+    <div id="slideshow-container">
+        <div class="album-slot"><img id="pic0" class="album-photo" src="image1.jpeg"></div>
+        <div class="album-slot"><img id="pic1" class="album-photo" src="image2.jpeg"></div>
+        <div class="album-slot"><img id="pic2" class="album-photo" src="image3.jpeg"></div>
+        <div class="album-slot"><img id="pic3" class="album-photo" src="image4.jpeg"></div>
+        <div class="album-slot"><img id="pic4" class="album-photo" src="image5.jpeg"></div>
+        <div class="album-slot"><img id="pic5" class="album-photo" src="image6.jpeg"></div>
+    </div>
 
     <div id="voicemail-section">
-        <div id="subtitle-text" class="pink-font"></div>
+        <div id="subtitle-text"></div>
     </div>
 
     <div id="choice-section">
-        <div class="choice-title pink-font">Can we fix this and talk properly now? 🥺❤️</div>
+        <div class="choice-title pink-font">I am just your baby, won't you forgive me? ❤️</div>
         <div class="btn-container">
             <button class="choice-btn" id="yes-btn">Yes</button>
             <button class="choice-btn" id="no-btn">No</button>
@@ -332,7 +372,7 @@
     </div>
 
     <audio id="bg-music" loop preload="auto">
-        <source src="./background_music.mp3" type="audio/mpeg">
+        <source src="back" type="audio/mpeg">
     </audio>
 
     <audio id="voicemail-audio" preload="auto">
@@ -341,7 +381,6 @@
 
 
 <script>
-    // --- IMAGES SETUP ---
     const images = [
         'image1.jpeg', 'image1.jpeg', 
         'image2.jpeg', 'image2.jpeg', 
@@ -351,44 +390,43 @@
         'image6.jpeg', 'image6.jpeg',
     ];
 
-    // --- TIMED SUBTITLES DATA ---
     const subtitles = [
-        [0, "Baby... First, I love you."],
-        [3, "I love you the most."],
-        [5, "You are my heart, you are my love, you are my wife."],
-        [9, "You are my sunshine, you are my everything."],
-        [12, "My day starts with you, and ends with you."],
-        [16, "There isn't any moment or a second that I won't miss you."],
-        [21, "I miss you every second. I want you with me every second."],
-        [27, "Even if I love you for the rest of my life..."],
-        [31, "It will be the best thing I will do."],
-        [34, "I won't get bored loving you."],
-        [37, "You are my favorite hobby, you are my favorite place."],
-        [41, "You are my everything."],
-        [44, "And I'm really sorry baby... from my heart."],
-        [49, "I'm really, really, really sorry."],
-        [53, "Mero... My life started with you."],
-        [57, "When you came, that's when my life started."],
-        [60, "And before that, nothing was there for me."],
-        [64, "After you, there is everything."],
-        [67, "And this... I don't wanna leave."],
-        [70, "I don't wanna be away with this life."],
-        [74, "Cause I love you, mero baby."],
-        [77, "I love you with whole my world."],
-        [80, "Ma kunai script wa kehi padhiraxuina, it is coming from my heart."],
-        [84, "It is coming from my heart."],
-        [87, "And... love, I love you."],
-        [91, "We will make things better, we will do better."],
-        [95, "We will be together, I will make you happy."],
-        [99, "I will try to be the best for you."],
-        [103, "And I love you so much, mero maya."],
-        [107, "I love you so much. Please, please, please forgive me."],
-        [112, "And let's... let's talk properly."],
+        [0, "Baby... First, I love you. "],
+        [3, "I love you the most. "],
+        [5, "You are my heart, you are my love, you are my wife. "],
+        [9, "You are my sunshine, you are my everything. "],
+        [12, "My day starts with you, and ends with you. "],
+        [16, "There isn't any moment or a second that I won't miss you. "],
+        [21, "I miss you every second. I want you with me every second. "],
+        [27, "Even if I love you for the rest of my life... "],
+        [31, "It will be the best thing I will do. "],
+        [34, "I won't get bored loving you. "],
+        [37, "You are my favorite hobby, you are my favorite place. "],
+        [41, "You are my everything. "],
+        [44, "And I'm really sorry baby... from my heart. "],
+        [49, "I'm really, really, really sorry. "],
+        [53, "Mero... My life started with you. "],
+        [57, "When you came, that's when my life started. "],
+        [60, "And before that, nothing was there for me. "],
+        [64, "After you, there is everything. "],
+        [67, "And this... I don't wanna leave. "],
+        [70, "I don't wanna be away with this life. "],
+        [74, "Cause I love you, mero baby. "],
+        [77, "I love you with whole my world. "],
+        [80, "Ma kunai script wa kehi padhiraxuina, it is coming from my heart. "],
+        [84, "It is coming from my heart. "],
+        [87, "And... love, I love you. "],
+        [91, "We will make things better, we will do better. "],
+        [95, "We will be together, I will make you happy. "],
+        [99, "I will try to be the best for you. "],
+        [103, "And I love you so much, mero maya. "],
+        [107, "I love you so much. Please, please, please forgive me. "],
+        [112, "And let's... let's talk properly. "],
         [116, "Let's love properly... ❤️"]
     ];
 
-    const wordsForYes = "Yay! Thank you for forgiving me, my queen. I love you the absolute most. Let's start over! 🥰❤️";
-    const wordsForNo  = "I understand you still need some time to heal, baby. Take your time, I am right here waiting for you whenever you are ready. I love you endlessly. 🥺";
+    const wordsForYes = "You're the best baby and thank you for believing in me.I LOVE YOU ❤️";
+    const wordsForNo  = "Got it my lovee no matter what my love for you will always be there and I will always be here for you.Take your time baby";
 
     const bgMusic = document.getElementById('bg-music');
     const voicemailAudio = document.getElementById('voicemail-audio');
@@ -398,10 +436,9 @@
     const gameGrid = document.getElementById('game-grid');
     const cards = [];
 
-    // --- SPLASH SCREEN INTERACTION INTERCEPT ---
     document.getElementById('start-game-btn').addEventListener('click', () => {
-        bgMusic.play().then(() => { bgMusic.pause(); }).catch(e => console.log("Priming engine..."));
-        voicemailAudio.play().then(() => { voicemailAudio.pause(); }).catch(e => console.log("Priming voice..."));
+        bgMusic.play().then(() => { bgMusic.pause(); }).catch(e => console.log("Priming..."));
+        voicemailAudio.play().then(() => { voicemailAudio.pause(); }).catch(e => console.log("Priming..."));
         
         const welcome = document.getElementById('welcome-screen');
         welcome.style.opacity = '0';
@@ -501,61 +538,70 @@
         document.getElementById('game-section').style.opacity = '0';
         setTimeout(() => {
             document.getElementById('game-section').style.display = 'none';
-            startSlideshow();
             playAudio();
-            startSubtitles(); // This hooks up our event listeners
+            revealAlbumGrid();
+            startContinuousParagraphSubtitles(); 
         }, 1500); 
     }
 
     function playAudio() {
         bgMusic.volume = 0.12; 
         bgMusic.currentTime = 0;
-        bgMusic.play().catch(err => console.log("Music play blocked:", err));
+        bgMusic.play().catch(err => console.log(err));
         
         setTimeout(() => { 
             voicemailAudio.currentTime = 0;
-            voicemailAudio.play().catch(err => console.log("Voice play blocked:", err)); 
-        }, 500); 
+            voicemailAudio.play().catch(err => console.log(err)); 
+        }, 200); 
     }
 
-    // --- ACCURATE HANDSHAKE TIMING ENGINE ---
-    function startSubtitles() {
-        // Wait specifically until the audio begins playing sound waves out of her phone speaker
-        voicemailAudio.onplaying = function() {
-            voicemailSection.style.opacity = '1';
-            
-            subtitles.forEach((subtitle) => {
-                const time = subtitle[0];
-                const text = subtitle[1];
-                setTimeout(() => {
-                    subtitleText.innerText = text;
-                    subtitleText.style.animation = 'none';
-                    subtitleText.offsetHeight; 
-                    subtitleText.style.animation = 'subtitleFade 0.4s';
-                }, time * 1000);
-            });
-        };
+    // --- CONTINUOUS PARAGRAPH TYPEWRITER CORE ---
+    function startContinuousParagraphSubtitles() {
+        voicemailSection.style.opacity = '1';
+        
+        let runningTypingTimeout = null;
 
-        voicemailAudio.onended = function() {
+        subtitles.forEach((subtitle) => {
+            const delayInMs = subtitle[0] * 1000;
+            const textToAppend = subtitle[1];
+
+            setTimeout(() => {
+                if (runningTypingTimeout) clearTimeout(runningTypingTimeout);
+                
+                let targetCharacterIndex = 0;
+                
+                function typeNextLetter() {
+                    if (targetCharacterIndex < textToAppend.length) {
+                        subtitleText.innerHTML += textToAppend.charAt(targetCharacterIndex);
+                        targetCharacterIndex++;
+                        subtitleText.scrollTop = subtitleText.scrollHeight;
+                        
+                        let calculatedSpeed = textToAppend.length > 55 ? 20 : 40;
+                        runningTypingTimeout = setTimeout(typeNextLetter, calculatedSpeed);
+                    }
+                }
+                typeNextLetter();
+            }, delayInMs);
+        });
+
+        setTimeout(() => {
             showChoiceScreen();
-        };
+        }, 121000); 
     }
 
-    function startSlideshow() {
+    // --- REVEAL IMAGES FULL VIEWPORT GRID ---
+    function revealAlbumGrid() {
         slideshowContainer.style.opacity = '1';
-        const slideshowImages = shuffle([...new Set(images)]); 
-        let currentImageIndex = 0;
-
-        function changeBackgroundImage() {
-            slideshowContainer.style.backgroundImage = `url(${slideshowImages[currentImageIndex]})`;
-            currentImageIndex = (currentImageIndex + 1) % slideshowImages.length;
+        
+        for (let i = 0; i < 6; i++) {
+            setTimeout(() => {
+                const photoNode = document.getElementById(`pic${i}`);
+                if (photoNode) photoNode.style.opacity = '1';
+            }, 500 + (i * 2200)); 
         }
-        changeBackgroundImage();
-        setInterval(changeBackgroundImage, 4500);
     }
 
     function showChoiceScreen() {
-        voicemailSection.style.opacity = '0';
         const choiceSection = document.getElementById('choice-section');
         choiceSection.style.visibility = 'visible';
         choiceSection.style.opacity = '1';

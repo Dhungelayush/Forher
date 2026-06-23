@@ -445,7 +445,7 @@
         // Play and immediately pause to bypass the browser's autoplay block
         bgMusic.play().then(() => { 
             bgMusic.pause(); 
-            bgMusic.volume = 0.12; // Double check volume setting is active
+            bgMusic.volume = 0.08; // Double check volume setting is active
         }).catch(e => console.log("Audio unlock failed for bgMusic:", e));
 
         voicemailAudio.play().then(() => { 
@@ -559,7 +559,7 @@
     // FIXED: Streamlined clean execution fallback
     function playAudio() {
         bgMusic.currentTime = 0;
-        bgMusic.volume = 0.12; 
+        bgMusic.volume = 0.08; 
         
         // Play background music with a safety guarantee
         const playBg = bgMusic.play();
@@ -650,3 +650,5 @@
 
     initGame();
 </script>
+</body>
+</html>

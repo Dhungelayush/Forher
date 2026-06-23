@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For My Favorite Person</title>
+    <style>
+        /* --- General Styling --- */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden; 
+            background-color: #f7e1e7;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .pink-font {
+            color: #ff4081; 
+            font-weight: bold;
+            font-size: 1.5rem;
+            text-align: center;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
+        }
+
+        /* --- Responsive Game Container --- */
+        #game-section {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            width: 100%;
+            height: 100vh;
+            opacity: 1;
+            transition: opacity 1.5s ease-out;
+            position: relative;
+            z-index: 10;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+
+        .header-text {
+            color: #fff;
+            background: linear-gradient(to right, #ff9a9e 0%, #fad0c4 99%, #fad0c4 100%);
+            padding: 12px 24px;
+            border-radius: 50px;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            box-shadow: 0px 4px 10px rgba(0,0,0,0.1);
+            max-width: 90%;
+        }
+
+        /* Responsive Grid Framework */
+        .memory-game {
+            width: 100%;
+            max-width: 500px;
+            aspect-ratio: 1 / 1; 
+            display: flex;
+            flex-wrap: wrap;
+            perspective: 1000px;
+        }
+
+        .memory-card {
+            width: calc(25% - 6px);
+            height: calc(33.333% - 6px);
+            margin: 3px;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.4s;
+            cursor: pointer;
+            box-shadow: 1px 2px 5px rgba(0,0,0,0.15);
+            border-radius: 8px;
+        }
+
+        .memory-card:active {
+            transform: scale(0.95);
+        }
+
+        .memory-card.flip {
+            transform: rotateY(180deg);
+            pointer-events: none;
+        }
+
+        .front-face, .back-face {
+            width: 100%;
+            height: 100%;
+            position: absolute;
+            border-radius: 8px;
+            backface-visibility: hidden;
+            background-color: #fff;
+            box-sizing: border-box;
+        }
+
+        .front-face {
+            transform: rotateY(180deg);
+            object-fit: cover; 
+        }
+
+        .back-face {
+            background: linear-gradient(45deg, #fad0c4 0%, #ffd1dc 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: #fff;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* --- Background Slideshow (Endless Looping) --- */
+        #slideshow-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            opacity: 0;
+            transition: opacity 1.5s ease-in, background-image 1s ease-in-out;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-color: #f7e1e7;
+        }
+
+        /* --- Subtitles Section (Top Responsive Placement) --- */
+        #voicemail-section {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            max-width: 500px;
+            z-index: 50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 1s ease-in;
+        }
+
+        #subtitle-text {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 12px 20px;
+            border-radius: 20px;
+            font-size: 1.2rem;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            width: 100%;
+        }
+
+        @keyframes subtitleFade {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Interactive Choice Overlay --- */
+        #choice-section {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 100;
+            background-color: rgba(247, 225, 231, 0.85); 
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 1s ease-in-out, visibility 1s;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .choice-title {
+            font-size: 1.8rem;
+            margin-bottom: 30px;
+            max-width: 400px;
+        }
+
+        .btn-container {
+            display: flex;
+            gap: 20px;
+        }
+
+        .choice-btn {
+            padding: 12px 35px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+
+        .choice-btn:active {
+            transform: scale(0.95);
+        }
+
+        #yes-btn {
+            background-color: #ff4081;
+            color: white;
+        }
+
+        #no-btn {
+            background-color: #ffffff;
+            color: #666;
+        }
+
+        /* Custom Popup Message Modal */
+        #popup-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            z-index: 200;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            width: 85%;
+            max-width: 400px;
+            box-sizing: border-box;
+            transition: transform 0.3s ease-out;
+        }
+
+        #popup-modal.show {
+            display: flex;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        #popup-text {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+        }
+
+        .close-btn {
+            background: linear-gradient(to right, #ff9a9e, #ff4081);
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- 1. MEMORY MATCH GAME SECTION -->
+    <div id="game-section">
+        <div class="header-text pink-font">Match the moments... solve it to hear something sweet.</div>
+        <div class="memory-game" id="game-grid"></div>
+    </div>
+
+    <!-- 2. SLIDESHOW BACKGROUND -->
+    <div id="slideshow-container"></div>
+
+    <!-- 3. VOICEMAIL SUBTITLES SECTION -->
+    <div id="voicemail-section">
+        <div id="subtitle-text" class="pink-font"></div>
+    </div>
+
+    <!-- 4. YES / NO INTERACTIVE CHOICE SCREEN -->
+    <div id="choice-section">
+        <!-- CUSTOM QUESTION SPACE -->
+        <div class="choice-title pink-font">Can we fix this and talk properly now? 🥺❤️</div>
+        <div class="btn-container">
+            <button class="choice-btn" id="yes-btn">Yes</button>
+            <button class="choice-btn" id="no-btn">No</button>
+        </div>
+    </div>
+
+    <!-- POPUP MODAL FOR REPLIES -->
+    <div id="popup-modal">
+        <div id="popup-text" class="pink-font"></div>
+        <button class="close-btn" onclick="closeModal()">Close</button>
+    </div>
+
+    <!-- HIDDEN AUDIO ELEMENTS -->
+    <audio id="bg-music" loop>
+        <source src="background_music.mp3" type="audio/mpeg">
+    </audio>
+
+    <audio id="voicemail-audio">
+        <source src="voicemail.mp3" type="audio/mpeg">
+    </audio>
+
+
+<script>
+    // --- IMAGES SETUP ---
+    const images = [
+        'image1.jpeg', 'image1.jpeg', 
+        'image2.jpeg', 'image2.jpeg', 
+        'image3.jpeg', 'image3.jpeg', 
+        'image4.jpeg', 'image4.jpeg', 
+        'image5.jpeg', 'image5.jpeg', 
+        'image6.jpeg', 'image6.jpeg', 
+
+    ];
+
+    // --- EXACT AUDIO CLIPPED SUBTITLES DATA ---
+    const subtitles = [
+        [0, "Baby... First, I love you."],
+        [3, "I love you the most."],
+        [5, "You are my heart, you are my love, you are my wife."],
+        [9, "You are my sunshine, you are my everything."],
+        [12, "My day starts with you, and ends with you."],
+        [16, "There isn't any moment or a second that I won't miss you."],
+        [21, "I miss you every second. I want you with me every second."],
+        [27, "Even if I love you for the rest of my life..."],
+        [31, "It will be the best thing I will do."],
+        [34, "I won't get bored loving you."],
+        [37, "You are my favorite hobby, you are my favorite place."],
+        [41, "You are my everything."],
+        [44, "And I'm really sorry baby... from my heart."],
+        [49, "I'm really, really, really sorry."],
+        [53, "Mero... My life started with you."],
+        [57, "When you came, that's when my life started."],
+        [60, "And before that, nothing was there for me."],
+        [64, "After you, there is everything."],
+        [67, "And this... I don't wanna leave."],
+        [70, "I don't wanna be away with this life."],
+        [74, "Cause I love you, mero baby."],
+        [77, "I love you with whole my world."],
+        [80, "Ma kunai script wa kehi padhiraxuina, it is coming from my heart."],
+        [84, "It is coming from my heart."],
+        [87, "And... love, I love you."],
+        [91, "We will make things better, we will do better."],
+        [95, "We will be together, I will make you happy."],
+        [99, "I will try to be the best for you."],
+        [103, "And I love you so much, mero maya."],
+        [107, "I love you so much. Please, please, please forgive me."],
+        [112, "And let's... let's talk properly."],
+        [116, "Let's love properly... ❤️"]
+    ];
+
+    // ==========================================
+    //   SPACE TO WRITE YOUR OWN CUSTOM WORDS:
+    // ==========================================
+    const wordsForYes = "Yay! Thank you for forgiving me, my queen. I love you the absolute most. Let's start over! 🥰❤️";
+    const wordsForNo  = "I understand you still need some time to heal, baby. Take your time, I am right here waiting for you whenever you are ready. I love you endlessly. 🥺";
+    // ==========================================
+
+
+    // --- MEMORY ENGINE CORE ---
+    const gameGrid = document.getElementById('game-grid');
+    const cards = [];
+
+    function shuffle(array) {
+        let currentIndex = array.length, randomIndex;
+        while (currentIndex !== 0) {
+            randomIndex = Math.floor(Math.random() * currentIndex);
+            currentIndex--;
+            [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
+        }
+        return array;
+    }
+
+    function initGame() {
+        gameGrid.innerHTML = ''; 
+        const shuffledImages = shuffle(images);
+
+        shuffledImages.forEach((imgSrc, index) => {
+            const card = document.createElement('div');
+            card.classList.add('memory-card');
+            card.dataset.framework = imgSrc;
+
+            const frontFace = document.createElement('img');
+            frontFace.src = imgSrc;
+            frontFace.alt = `Moment ${index}`;
+            frontFace.classList.add('front-face');
+
+            const backFace = document.createElement('div');
+            backFace.classList.add('back-face');
+            backFace.innerText = '❤️'; 
+
+            card.appendChild(frontFace);
+            card.appendChild(backFace);
+            gameGrid.appendChild(card);
+            cards.push(card);
+        });
+
+        cards.forEach(card => card.addEventListener('click', flipCard));
+    }
+
+    let hasFlippedCard = false;
+    let lockBoard = false;
+    let firstCard, secondCard;
+    let matchesFound = 0;
+    const totalPairs = images.length / 2;
+
+   function flipCard() {
+        if (lockBoard) return;
+        if (this === firstCard) return;
+
+        // NEW: This forces the browser to unlock audio on the very first click
+        if (bgMusic.paused) {
+            bgMusic.play().then(() => {
+                // Keep it paused or muted until the win state if you prefer, 
+                // but letting it prime here fixes the browser block.
+                bgMusic.pause(); 
+            }).catch(e => console.log("Audio priming waiting for interaction"));
+        }
+
+        this.classList.add('flip');
+
+        if (!hasFlippedCard) {
+            hasFlippedCard = true;
+            firstCard = this;
+            return;
+        }
+
+        secondCard = this;
+        checkForMatch();
+    }
+
+    function checkForMatch() {
+        let isMatch = firstCard.dataset.framework === secondCard.dataset.framework;
+        isMatch ? disableCards() : unflipCards();
+    }
+
+    function disableCards() {
+        firstCard.removeEventListener('click', flipCard);
+        secondCard.removeEventListener('click', flipCard);
+        matchesFound++;
+
+        if (matchesFound === totalPairs) {
+            handleWin();
+        }
+        resetBoard();
+    }
+
+    function unflipCards() {
+        lockBoard = true;
+        setTimeout(() => {
+            firstCard.classList.remove('flip');
+            secondCard.classList.remove('flip');
+            resetBoard();
+        }, 1000);
+    }
+
+    function resetBoard() {
+        [hasFlippedCard, lockBoard] = [false, false];
+        [firstCard, secondCard] = [null, null];
+    }
+
+
+    // --- FLOW TRIGGERS ---
+    function handleWin() {
+        document.getElementById('game-section').style.opacity = '0';
+        setTimeout(() => {
+            document.getElementById('game-section').style.display = 'none';
+            startSlideshow();
+            playAudio();
+            startSubtitles();
+        }, 1500); 
+    }
+
+    const bgMusic = document.getElementById('bg-music');
+    const voicemailAudio = document.getElementById('voicemail-audio');
+    const subtitleText = document.getElementById('subtitle-text');
+    const voicemailSection = document.getElementById('voicemail-section');
+    const slideshowContainer = document.getElementById('slideshow-container');
+
+    function playAudio() {
+        bgMusic.volume = 0.12; // Low soft music level
+        bgMusic.play();
+        setTimeout(() => { voicemailAudio.play(); }, 500); 
+    }
+
+    function startSubtitles() {
+        voicemailSection.style.opacity = '1';
+        subtitles.forEach((subtitle) => {
+            const time = subtitle[0];
+            const text = subtitle[1];
+            setTimeout(() => {
+                subtitleText.innerText = text;
+                subtitleText.style.animation = 'none';
+                subtitleText.offsetHeight; 
+                subtitleText.style.animation = 'subtitleFade 0.4s';
+            }, time * 1000);
+        });
+
+        // Trigger prompt exactly when voicemail audio ends
+        voicemailAudio.onended = function() {
+            showChoiceScreen();
+        };
+    }
+
+    // --- LOOPING SLIDESHOW BACKGROUND ENGINE ---
+    function startSlideshow() {
+        slideshowContainer.style.opacity = '1';
+        const slideshowImages = shuffle([...new Set(images)]); 
+        let currentImageIndex = 0;
+
+        function changeBackgroundImage() {
+            slideshowContainer.style.backgroundImage = `url(${slideshowImages[currentImageIndex]})`;
+            // Loops seamlessly forever back to 0 index cycle end
+            currentImageIndex = (currentImageIndex + 1) % slideshowImages.length;
+        }
+        changeBackgroundImage();
+        setInterval(changeBackgroundImage, 4500); // Transitions smoothly every 4.5 seconds
+    }
+
+    // --- CHOICE OVERLAY CONTROLS ---
+    function showChoiceScreen() {
+        voicemailSection.style.opacity = '0';
+        const choiceSection = document.getElementById('choice-section');
+        choiceSection.style.visibility = 'visible';
+        choiceSection.style.opacity = '1';
+    }
+
+    document.getElementById('yes-btn').addEventListener('click', () => {
+        showModal(wordsForYes);
+    });
+
+    document.getElementById('no-btn').addEventListener('click', () => {
+        showModal(wordsForNo);
+    });
+
+    function showModal(messageText) {
+        document.getElementById('popup-text').innerText = messageText;
+        document.getElementById('popup-modal').classList.add('show');
+    }
+
+    function closeModal() {
+        document.getElementById('popup-modal').classList.remove('remove');
+        document.getElementById('popup-modal').style.display = 'none';
+    }
+
+    initGame();
+</script>
+</body>
+</html>

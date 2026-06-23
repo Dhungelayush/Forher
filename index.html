@@ -26,7 +26,7 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
         }
 
-        /* --- NEW: Audio Unlock Splash Screen --- */
+        /* --- Audio Unlock Splash Screen --- */
         #welcome-screen {
             position: fixed;
             top: 0;
@@ -299,7 +299,6 @@
 </head>
 <body>
 
-    <!-- NEW: WELCOME SCREEN TO UNLOCK BROWSER AUDIO -->
     <div id="welcome-screen">
         <div class="welcome-card">
             <div class="pink-font" style="font-size: 1.6rem; margin-bottom: 10px;">Hey Beautiful... ❤️</div>
@@ -308,21 +307,17 @@
         </div>
     </div>
 
-    <!-- 1. MEMORY MATCH GAME SECTION -->
     <div id="game-section">
         <div class="header-text pink-font">Match the moments... solve it to hear something sweet.</div>
         <div class="memory-game" id="game-grid"></div>
     </div>
 
-    <!-- 2. SLIDESHOW BACKGROUND -->
     <div id="slideshow-container"></div>
 
-    <!-- 3. VOICEMAIL SUBTITLES SECTION -->
     <div id="voicemail-section">
         <div id="subtitle-text" class="pink-font"></div>
     </div>
 
-    <!-- 4. YES / NO INTERACTIVE CHOICE SCREEN -->
     <div id="choice-section">
         <div class="choice-title pink-font">Can we fix this and talk properly now? 🥺❤️</div>
         <div class="btn-container">
@@ -331,13 +326,11 @@
         </div>
     </div>
 
-    <!-- POPUP MODAL FOR REPLIES -->
     <div id="popup-modal">
         <div id="popup-text" class="pink-font"></div>
         <button class="close-btn" onclick="closeModal()">Close</button>
     </div>
 
-    <!-- AUDIO ELEMENTS USING EXPLICIT RELATIVE PATHS -->
     <audio id="bg-music" loop preload="auto">
         <source src="./background_music.mp3" type="audio/mpeg">
     </audio>
@@ -405,13 +398,11 @@
     const gameGrid = document.getElementById('game-grid');
     const cards = [];
 
-    // --- NEW: SPLASH SCREEN INTERACTION INTERCEPT ---
+    // --- SPLASH SCREEN INTERACTION INTERCEPT ---
     document.getElementById('start-game-btn').addEventListener('click', () => {
-        // Explicitly load and safely prime elements via user-token gesture
         bgMusic.play().then(() => { bgMusic.pause(); }).catch(e => console.log("Priming engine..."));
         voicemailAudio.play().then(() => { voicemailAudio.pause(); }).catch(e => console.log("Priming voice..."));
         
-        // Hide overlay smoothly
         const welcome = document.getElementById('welcome-screen');
         welcome.style.opacity = '0';
         setTimeout(() => { welcome.style.display = 'none'; }, 800);
@@ -512,7 +503,7 @@
             document.getElementById('game-section').style.display = 'none';
             startSlideshow();
             playAudio();
-            startSubtitles();
+            startSubtitles(); // This hooks up our event listeners
         }, 1500); 
     }
 
@@ -527,18 +518,23 @@
         }, 500); 
     }
 
+    // --- ACCURATE HANDSHAKE TIMING ENGINE ---
     function startSubtitles() {
-        voicemailSection.style.opacity = '1';
-        subtitles.forEach((subtitle) => {
-            const time = subtitle[0];
-            const text = subtitle[1];
-            setTimeout(() => {
-                subtitleText.innerText = text;
-                subtitleText.style.animation = 'none';
-                subtitleText.offsetHeight; 
-                subtitleText.style.animation = 'subtitleFade 0.4s';
-            }, time * 1000);
-        });
+        // Wait specifically until the audio begins playing sound waves out of her phone speaker
+        voicemailAudio.onplaying = function() {
+            voicemailSection.style.opacity = '1';
+            
+            subtitles.forEach((subtitle) => {
+                const time = subtitle[0];
+                const text = subtitle[1];
+                setTimeout(() => {
+                    subtitleText.innerText = text;
+                    subtitleText.style.animation = 'none';
+                    subtitleText.offsetHeight; 
+                    subtitleText.style.animation = 'subtitleFade 0.4s';
+                }, time * 1000);
+            });
+        };
 
         voicemailAudio.onended = function() {
             showChoiceScreen();

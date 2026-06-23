@@ -372,11 +372,11 @@
     </div>
 
     <audio id="bg-music" loop preload="auto">
-        <source src="back" type="audio/mpeg">
+        <source src="background_music.mp3" type="audio/mpeg">
     </audio>
 
     <audio id="voicemail-audio" preload="auto">
-        <source src="./voicemail.mp3" type="audio/mpeg">
+        <source src="voicemail.mp3" type="audio/mpeg">
     </audio>
 
 
@@ -425,8 +425,8 @@
         [116, "Let's love properly... ❤️"]
     ];
 
-    const wordsForYes = "You're the best baby and thank you for believing in me.I LOVE YOU ❤️";
-    const wordsForNo  = "Got it my lovee no matter what my love for you will always be there and I will always be here for you.Take your time baby";
+    const wordsForYes = "Yay! Thank you for forgiving me, my queen. I love you the absolute most. Let's start over! 🥰❤️";
+    const wordsForNo  = "I understand you still need some time to heal, baby. Take your time, I am right here waiting for you whenever you are ready. I love you endlessly. 🥺";
 
     const bgMusic = document.getElementById('bg-music');
     const voicemailAudio = document.getElementById('voicemail-audio');
@@ -436,9 +436,21 @@
     const gameGrid = document.getElementById('game-grid');
     const cards = [];
 
+    // FIXED: Robust browser unlock sequence for audio assets
     document.getElementById('start-game-btn').addEventListener('click', () => {
-        bgMusic.play().then(() => { bgMusic.pause(); }).catch(e => console.log("Priming..."));
-        voicemailAudio.play().then(() => { voicemailAudio.pause(); }).catch(e => console.log("Priming..."));
+        // Force fully loading the tracks on user gesture
+        bgMusic.load();
+        voicemailAudio.load();
+
+        // Play and immediately pause to bypass the browser's autoplay block
+        bgMusic.play().then(() => { 
+            bgMusic.pause(); 
+            bgMusic.volume = 0.12; // Double check volume setting is active
+        }).catch(e => console.log("Audio unlock failed for bgMusic:", e));
+
+        voicemailAudio.play().then(() => { 
+            voicemailAudio.pause(); 
+        }).catch(e => console.log("Audio unlock failed for voicemail:", e));
         
         const welcome = document.getElementById('welcome-screen');
         welcome.style.opacity = '0';
@@ -544,14 +556,24 @@
         }, 1500); 
     }
 
+    // FIXED: Streamlined clean execution fallback
     function playAudio() {
-        bgMusic.volume = 0.12; 
         bgMusic.currentTime = 0;
-        bgMusic.play().catch(err => console.log(err));
+        bgMusic.volume = 0.12; 
+        
+        // Play background music with a safety guarantee
+        const playBg = bgMusic.play();
+        if (playBg !== undefined) {
+            playBg.catch(err => {
+                console.log("Background music context recovery required:", err);
+                // Fallback direct retry if context stalled
+                bgMusic.play();
+            });
+        }
         
         setTimeout(() => { 
             voicemailAudio.currentTime = 0;
-            voicemailAudio.play().catch(err => console.log(err)); 
+            voicemailAudio.play().catch(err => console.log("Voicemail playback stalled:", err)); 
         }, 200); 
     }
 
@@ -628,5 +650,3 @@
 
     initGame();
 </script>
-</body>
-</html>

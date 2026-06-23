@@ -26,6 +26,52 @@
             text-shadow: 1px 1px 2px rgba(0,0,0,0.05);
         }
 
+        /* --- NEW: Audio Unlock Splash Screen --- */
+        #welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: linear-gradient(135deg, #f7e1e7 0%, #ffd1dc 100%);
+            z-index: 2000;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease-out, visibility 0.8s;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .welcome-card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(255, 64, 129, 0.15);
+            text-align: center;
+            max-width: 400px;
+            width: 90%;
+        }
+
+        .start-btn {
+            background: linear-gradient(to right, #ff9a9e, #ff4081);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 25px;
+            box-shadow: 0 5px 15px rgba(255, 64, 129, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .start-btn:active {
+            transform: scale(0.95);
+        }
+
         /* --- Responsive Game Container --- */
         #game-section {
             display: flex;
@@ -53,7 +99,6 @@
             max-width: 90%;
         }
 
-        /* Responsive Grid Framework */
         .memory-game {
             width: 100%;
             max-width: 500px;
@@ -109,7 +154,7 @@
             font-weight: bold;
         }
 
-        /* --- Background Slideshow (Endless Looping) --- */
+        /* --- Background Slideshow --- */
         #slideshow-container {
             position: absolute;
             top: 0;
@@ -125,7 +170,7 @@
             background-color: #f7e1e7;
         }
 
-        /* --- Subtitles Section (Top Responsive Placement) --- */
+        /* --- Subtitles Section --- */
         #voicemail-section {
             position: absolute;
             top: 30px;
@@ -254,6 +299,15 @@
 </head>
 <body>
 
+    <!-- NEW: WELCOME SCREEN TO UNLOCK BROWSER AUDIO -->
+    <div id="welcome-screen">
+        <div class="welcome-card">
+            <div class="pink-font" style="font-size: 1.6rem; margin-bottom: 10px;">Hey Beautiful... ❤️</div>
+            <div class="pink-font" style="font-size: 1.1rem; font-weight: normal; color: #888;">I made a little puzzle out of our memories. Turn your volume up and click below to open it.</div>
+            <button class="start-btn" id="start-game-btn">Play thiss</button>
+        </div>
+    </div>
+
     <!-- 1. MEMORY MATCH GAME SECTION -->
     <div id="game-section">
         <div class="header-text pink-font">Match the moments... solve it to hear something sweet.</div>
@@ -270,7 +324,6 @@
 
     <!-- 4. YES / NO INTERACTIVE CHOICE SCREEN -->
     <div id="choice-section">
-        <!-- CUSTOM QUESTION SPACE -->
         <div class="choice-title pink-font">Can we fix this and talk properly now? 🥺❤️</div>
         <div class="btn-container">
             <button class="choice-btn" id="yes-btn">Yes</button>
@@ -284,13 +337,13 @@
         <button class="close-btn" onclick="closeModal()">Close</button>
     </div>
 
-    <!-- HIDDEN AUDIO ELEMENTS -->
-    <audio id="bg-music" loop>
-        <source src="background_music.mp3" type="audio/mpeg">
+    <!-- AUDIO ELEMENTS USING EXPLICIT RELATIVE PATHS -->
+    <audio id="bg-music" loop preload="auto">
+        <source src="./background_music.mp3" type="audio/mpeg">
     </audio>
 
-    <audio id="voicemail-audio">
-        <source src="voicemail.mp3" type="audio/mpeg">
+    <audio id="voicemail-audio" preload="auto">
+        <source src="./voicemail.mp3" type="audio/mpeg">
     </audio>
 
 
@@ -302,11 +355,10 @@
         'image3.jpeg', 'image3.jpeg', 
         'image4.jpeg', 'image4.jpeg', 
         'image5.jpeg', 'image5.jpeg', 
-        'image6.jpeg', 'image6.jpeg', 
-
+        'image6.jpeg', 'image6.jpeg',
     ];
 
-    // --- EXACT AUDIO CLIPPED SUBTITLES DATA ---
+    // --- TIMED SUBTITLES DATA ---
     const subtitles = [
         [0, "Baby... First, I love you."],
         [3, "I love you the most."],
@@ -342,17 +394,28 @@
         [116, "Let's love properly... ❤️"]
     ];
 
-    // ==========================================
-    //   SPACE TO WRITE YOUR OWN CUSTOM WORDS:
-    // ==========================================
     const wordsForYes = "Yay! Thank you for forgiving me, my queen. I love you the absolute most. Let's start over! 🥰❤️";
     const wordsForNo  = "I understand you still need some time to heal, baby. Take your time, I am right here waiting for you whenever you are ready. I love you endlessly. 🥺";
-    // ==========================================
 
-
-    // --- MEMORY ENGINE CORE ---
+    const bgMusic = document.getElementById('bg-music');
+    const voicemailAudio = document.getElementById('voicemail-audio');
+    const subtitleText = document.getElementById('subtitle-text');
+    const voicemailSection = document.getElementById('voicemail-section');
+    const slideshowContainer = document.getElementById('slideshow-container');
     const gameGrid = document.getElementById('game-grid');
     const cards = [];
+
+    // --- NEW: SPLASH SCREEN INTERACTION INTERCEPT ---
+    document.getElementById('start-game-btn').addEventListener('click', () => {
+        // Explicitly load and safely prime elements via user-token gesture
+        bgMusic.play().then(() => { bgMusic.pause(); }).catch(e => console.log("Priming engine..."));
+        voicemailAudio.play().then(() => { voicemailAudio.pause(); }).catch(e => console.log("Priming voice..."));
+        
+        // Hide overlay smoothly
+        const welcome = document.getElementById('welcome-screen');
+        welcome.style.opacity = '0';
+        setTimeout(() => { welcome.style.display = 'none'; }, 800);
+    });
 
     function shuffle(array) {
         let currentIndex = array.length, randomIndex;
@@ -397,18 +460,9 @@
     let matchesFound = 0;
     const totalPairs = images.length / 2;
 
-   function flipCard() {
+    function flipCard() {
         if (lockBoard) return;
         if (this === firstCard) return;
-
-        // NEW: This forces the browser to unlock audio on the very first click
-        if (bgMusic.paused) {
-            bgMusic.play().then(() => {
-                // Keep it paused or muted until the win state if you prefer, 
-                // but letting it prime here fixes the browser block.
-                bgMusic.pause(); 
-            }).catch(e => console.log("Audio priming waiting for interaction"));
-        }
 
         this.classList.add('flip');
 
@@ -452,8 +506,6 @@
         [firstCard, secondCard] = [null, null];
     }
 
-
-    // --- FLOW TRIGGERS ---
     function handleWin() {
         document.getElementById('game-section').style.opacity = '0';
         setTimeout(() => {
@@ -464,16 +516,15 @@
         }, 1500); 
     }
 
-    const bgMusic = document.getElementById('bg-music');
-    const voicemailAudio = document.getElementById('voicemail-audio');
-    const subtitleText = document.getElementById('subtitle-text');
-    const voicemailSection = document.getElementById('voicemail-section');
-    const slideshowContainer = document.getElementById('slideshow-container');
-
     function playAudio() {
-        bgMusic.volume = 0.12; // Low soft music level
-        bgMusic.play();
-        setTimeout(() => { voicemailAudio.play(); }, 500); 
+        bgMusic.volume = 0.12; 
+        bgMusic.currentTime = 0;
+        bgMusic.play().catch(err => console.log("Music play blocked:", err));
+        
+        setTimeout(() => { 
+            voicemailAudio.currentTime = 0;
+            voicemailAudio.play().catch(err => console.log("Voice play blocked:", err)); 
+        }, 500); 
     }
 
     function startSubtitles() {
@@ -489,13 +540,11 @@
             }, time * 1000);
         });
 
-        // Trigger prompt exactly when voicemail audio ends
         voicemailAudio.onended = function() {
             showChoiceScreen();
         };
     }
 
-    // --- LOOPING SLIDESHOW BACKGROUND ENGINE ---
     function startSlideshow() {
         slideshowContainer.style.opacity = '1';
         const slideshowImages = shuffle([...new Set(images)]); 
@@ -503,14 +552,12 @@
 
         function changeBackgroundImage() {
             slideshowContainer.style.backgroundImage = `url(${slideshowImages[currentImageIndex]})`;
-            // Loops seamlessly forever back to 0 index cycle end
             currentImageIndex = (currentImageIndex + 1) % slideshowImages.length;
         }
         changeBackgroundImage();
-        setInterval(changeBackgroundImage, 4500); // Transitions smoothly every 4.5 seconds
+        setInterval(changeBackgroundImage, 4500);
     }
 
-    // --- CHOICE OVERLAY CONTROLS ---
     function showChoiceScreen() {
         voicemailSection.style.opacity = '0';
         const choiceSection = document.getElementById('choice-section');
@@ -532,8 +579,9 @@
     }
 
     function closeModal() {
-        document.getElementById('popup-modal').classList.remove('remove');
-        document.getElementById('popup-modal').style.display = 'none';
+        document.getElementById('popup-modal').classList.remove('show');
+        document.getElementById('choice-section').style.opacity = '0';
+        document.getElementById('choice-section').style.visibility = 'hidden';
     }
 
     initGame();
